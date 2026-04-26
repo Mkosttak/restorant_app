@@ -1,0 +1,19 @@
+{
+  "name": "bolena",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "dev:web": "npm run dev --workspace=apps/web",
+    "dev:api": "npm run start:dev --workspace=apps/api"
+  },
+  "devDependencies": {
+    "turbo": "^2.3.0"
+  }
+}

@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  EMPLOYEE
+}
+
+enum TableStatus {
+  AVAILABLE
+  OCCUPIED
+  RESERVED
+}
+
+enum OrderStatus {
+  PENDING
+  PREPARING
+  READY
+  SERVED
+  COMPLETED
+  CANCELLED
+}
+
+enum OrderType {
+  DINE_IN
+  TAKEAWAY
+  PLATFORM
+}
+
+enum PaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique
+  name          String
+  passwordHash  String    @map("password_hash")
+  role          UserRole  @default(EMPLOYEE)
+  isActive      Boolean   @default(true) @map("is_active")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  orders        Order[]
+  payments      Payment[]
+  auditLogs     AuditLog[]
+
+  @@map("users")
+}
+
+model Table {
+  id         String      @id @default(uuid())
+  number     Int         @unique
+  label      String?
+  capacity   Int         @default(4)
+  status     TableStatus @default(AVAILABLE)
+  positionX  Int?        @map("position_x")
+  positionY  Int?        @map("position_y")
+  isActive   Boolean     @default(true) @map("is_active")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+
+  orders       Order[]
+  reservations Reservation[]
+
+  @@map("tables")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  nameTr    String   @map("name_tr")
+  nameEn    String   @map("name_en")
+  sortOrder Int      @default(0) @map("sort_order")
+  isActive  Boolean  @default(true) @map("is_active")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  menuItems MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id                 String    @id @default(uuid())
+  categoryId         String    @map("category_id")
+  nameTr             String    @map("name_tr")
+  nameEn             String    @map("name_en")
+  descriptionTr      String?   @map("description_tr")
+  descriptionEn      String?   @map("description_en")
+  priceCents         Int       @map("price_cents")
+  imageUrl           String?   @map("image_url")
+  isAvailable        Boolean   @default(true) @map("is_available")
+  stockTracking      Boolean   @default(false) @map("stock_tracking")
+  stockCount         Int?      @map("stock_count")
+  stockThreshold     Int       @default(3) @map("stock_threshold")
+  campaignPriceCents Int?      @map("campaign_price_cents")
+  campaignEndsAt     DateTime? @map("campaign_ends_at")
+  sortOrder          Int       @default(0) @map("sort_order")
+  isGlutenFree       Boolean   @default(true) @map("is_gluten_free")
+  deletedAt          DateTime? @map("deleted_at")
+  createdAt          DateTime  @default(now()) @map("created_at")
+  updatedAt          DateTime  @updatedAt @map("updated_at")
+
+  category    Category         @relation(fields: [categoryId], references: [id])
+  options     MenuItemOption[]
+  orderItems  OrderItem[]
+
+  @@map("menu_items")
+}
+
+model MenuItemOption {
+  id             String  @id @default(uuid())
+  menuItemId     String  @map("menu_item_id")
+  nameTr         String  @map("name_tr")
+  nameEn         String  @map("name_en")
+  extraPriceCents Int    @default(0) @map("extra_price_cents")
+  isActive       Boolean @default(true) @map("is_active")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("menu_item_options")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  tableId     String?     @map("table_id")
+  userId      String      @map("user_id")
+  orderType   OrderType   @default(DINE_IN) @map("order_type")
+  status      OrderStatus @default(PENDING)
+  note        String?
+  totalCents    Int         @default(0) @map("total_cents")
+  discountCents Int         @default(0) @map("discount_cents")
+  createdAt     DateTime    @default(now()) @map("created_at")
+  updatedAt     DateTime    @updatedAt @map("updated_at")
+
+  table      Table?      @relation(fields: [tableId], references: [id])
+  user       User        @relation(fields: [userId], references: [id])
+  items      OrderItem[]
+  payments   Payment[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id             String  @id @default(uuid())
+  orderId        String  @map("order_id")
+  menuItemId     String  @map("menu_item_id")
+  quantity       Int     @default(1)
+  unitPriceCents Int     @map("unit_price_cents")
+  options        Json?
+  note           String?
+  isComplimentary Boolean @default(false) @map("is_complimentary")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  order    Order    @relation(fields: [orderId], references: [id])
+  menuItem MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  orderId       String        @map("order_id")
+  userId        String        @map("user_id")
+  amountCents   Int           @map("amount_cents")
+  method        PaymentMethod
+  note          String?
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  order Order @relation(fields: [orderId], references: [id])
+  user  User  @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+model Reservation {
+  id             String    @id @default(uuid())
+  tableId        String    @map("table_id")
+  customerName   String    @map("customer_name")
+  customerPhone  String?   @map("customer_phone")
+  guestCount     Int       @default(2) @map("guest_count")
+  reservedAt     DateTime  @map("reserved_at")
+  note           String?
+  status         String    @default("PENDING")
+  linkedOrderId  String?   @map("linked_order_id")
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  table Table @relation(fields: [tableId], references: [id])
+
+  @@map("reservations")
+}
+
+model BusinessHours {
+  id        String  @id @default(uuid())
+  dayOfWeek Int     @map("day_of_week")
+  openTime  String  @map("open_time")
+  closeTime String  @map("close_time")
+  isClosed  Boolean @default(false) @map("is_closed")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([dayOfWeek])
+  @@map("business_hours")
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  action    String
+  entity    String
+  entityId  String?  @map("entity_id")
+  details   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("audit_logs")
+}

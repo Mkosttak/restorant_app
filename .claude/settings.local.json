@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -c \":*)",
+      "Bash(npx @nestjs/cli@latest new api --directory apps/api --package-manager npm --skip-git --skip-install)",
+      "Bash(npx create-next-app@latest apps/web --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --use-npm)",
+      "Bash(npx create-next-app@latest apps/web --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --no-turbopack --use-npm --yes)",
+      "Bash(npx shadcn@latest init -d --yes)",
+      "Bash(npx shadcn@latest add card input label dialog table badge dropdown-menu separator sheet avatar tabs textarea select switch --yes)",
+      "Bash(docker-compose up:*)",
+      "Bash(docker ps:*)",
+      "Bash(npx prisma:*)",
+      "Bash(PGPASSWORD=bolena123 psql -h localhost -p 5432 -U bolena -d bolena -c \"SELECT 1\")",
+      "Bash(docker exec:*)",
+      "Bash(powershell -c \"Get-NetTCPConnection -LocalPort 5432 2>$null | Select-Object LocalAddress,LocalPort,OwningProcess\")",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(timeout 15 npm run start:dev)",
+      "Bash(powershell -c \"Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | Select-Object OwningProcess -Unique\")",
+      "Bash(powershell -c \"Stop-Process -Id 17528 -Force\")",
+      "Bash(powershell -c \"Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object OwningProcess -Unique\")",
+      "Bash(powershell -c \"Stop-Process -Id 10944 -Force\")",
+      "Bash(where npm.cmd)",
+      "Bash(curl -s -X POST http://localhost:3001/api/v1/auth/login -H \"Content-Type: application/json\" -d '{\"\"email\"\":\"\"admin@bolena.com\"\",\"\"password\"\":\"\"admin123\"\"}')",
+      "Bash(powershell -c \"Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | Select-Object OwningProcess -Unique; Get-NetTCPConnection -LocalPort 3000 -ErrorAction SilentlyContinue | Select-Object OwningProcess -Unique\")",
+      "Bash(powershell -c \"Stop-Process -Id 5624 -Force; Stop-Process -Id 12788 -Force\")",
+      "Bash(where node:*)",
+      "Bash(powershell -Command \"Get-NetTCPConnection -LocalPort 3001 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_OwningProcess -Force }\")",
+      "Bash(netstat -ano)",
+      "Bash(findstr :3001)",
+      "Bash(taskkill //PID 16352 //F)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git branch *)",
+      "Bash(git remote *)",
+      "Bash(git push *)"
+    ]
+  }
+}
